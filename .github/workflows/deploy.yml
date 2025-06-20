@@ -11,12 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: 🔐 Decodificar clave privada del VPS
+        run: |
+          echo "${{ secrets.VPS_KEY_BASE64 }}" | base64 -d > id_rsa
+          chmod 600 id_rsa
+
       - name: 🔐 Conectar por SSH y ejecutar comandos
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
+          key_path: ./id_rsa
           port: 5755
           script: |
             echo "📁 Entrando al proyecto"
