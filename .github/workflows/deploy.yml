@@ -1,0 +1,40 @@
+name: 🚀 Deploy a VPS con build en servidor
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Ejecutar deploy remoto
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔐 Conectar por SSH y ejecutar comandos
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: 5755
+          script: |
+            echo "📁 Entrando al proyecto"
+            cd /var/www/matescode || exit 1
+
+            echo "🌀 Stasheando cambios locales"
+            git stash || exit 1
+
+            echo "⬇️ Actualizando código"
+            git pull || exit 1
+
+            echo "🧹 Borrando carpeta dist"
+            rm -rf dist || exit 1
+
+            echo "📦 Instalando dependencias"
+            npm install || exit 1
+
+            echo "⚙️ Ejecutando build"
+            npm run build || exit 1
+
+            echo "✅ Deploy completado con éxito"
